@@ -1,7 +1,7 @@
 import numpy as np
 from tri import tri
 
-def put_option_american():	# TODO: parameterize variables
+def put_option(flag):	# TODO: parameterize variables
 	K = 50.0 	# strick price
 	r = 0.10 	# risk-free interest rate
 	sigma = 0.5 #0.4 	# volatility
@@ -20,25 +20,38 @@ def put_option_american():	# TODO: parameterize variables
 	for j in range(1, M + 1):
 		a[j] = 0.5 * delta_t * (r * j - np.square(sigma) * np.square(j))
 		d[j] = 1 + delta_t * (r + np.square(sigma) * np.square(j))
-		c[j] = 0.5 * delta_t * (-r * j + np.square(sigma) * np.square(j))
+		c[j] = 0.5 * delta_t * (-r * j - np.square(sigma) * np.square(j))
 
-	b = np.empty([N + 1, M + 1])
+	b = np.full([N + 1, M + 1], 0.0)
 
 	for j in range(M + 1):
 		b[N][j] = max(K - j * delta_s, 0)
 	for i in range(N + 1):
 		b[i][0] = K
 
+	# a_, d_, c_ = map(np.asfarray, (a, d, c))
+	# a_ = a_[2:-1]
+	# c_ = c_[1:-2]
+	# d_ = d_[1:-1]
+	# A = np.diag(a_, -1) + np.diag(d_, 0) + np.diag(c_, 1)
+
 	for i in range(N - 1, -1, -1):
 		y = np.array(b[i + 1, :])
 		y = y[1 : M]
-		y[0] = y[0] - a[0] * K
+		y[0] = y[0] - a[0] * K	# len(y) = M - 1
+
+		# x = np.linalg.solve(A, y)
 		x = tri(len(y), a, d, c, y)
+
 		for j in range(1, M):
 			b[i][j] = x[j - 1]
 
-		for j in range(M + 1):
-			b[i][j] = max(K - j * delta_s, b[i][j])
+		if(flag is 'american'):
+			for j in range(M + 1):
+				b[i][j] = max(K - j * delta_s, b[i][j])
+
+	# print(b) #
 
 if __name__ == '__main__':
-    put_option_american()
+    # put_option('american')
+    put_option('european')
