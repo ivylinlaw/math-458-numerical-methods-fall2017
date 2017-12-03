@@ -1,14 +1,15 @@
 import numpy as np
 from tri import tri
+# from scipy import interpolate
 
 def put_option(flag):	# TODO: parameterize variables
 	K = 50.0 	# strick price
 	r = 0.10 	# risk-free interest rate
-	sigma = 0.5 #0.4 	# volatility
-	T = 1.0 #5.0	# life of option (unit as month)
+	sigma = 0.4 	# volatility
+	T = 5.0 / 12	# life of option (unit as year)
 	N = 10	# number of time intervals
-	S_max = 150.0 #100.0		# stock price where f(S_max, t) = 0
-	M = 150 #20 	# number of stock prices intervals
+	S_max = 100.0		# stock price where f(S_max, t) = 0
+	M = 20 	# number of stock prices intervals
 
 	delta_t = T / N 	# length of each equally spaced time interval
 	delta_s = S_max / M 	# length of each equally spaced stock price interval
@@ -29,19 +30,21 @@ def put_option(flag):	# TODO: parameterize variables
 	for i in range(N + 1):
 		b[i][0] = K
 
-	# a_, d_, c_ = map(np.asfarray, (a, d, c))
-	# a_ = a_[2:-1]
-	# c_ = c_[1:-2]
-	# d_ = d_[1:-1]
-	# A = np.diag(a_, -1) + np.diag(d_, 0) + np.diag(c_, 1)
+	# construct tridiagonal matrix A
+	a_, d_, c_ = map(np.asfarray, (a, d, c))
+	a_ = a_[2 : -1]
+	c_ = c_[1 : -2]
+	d_ = d_[1 : -1]
+	A = np.diag(a_, -1) + np.diag(d_, 0) + np.diag(c_, 1)
 
 	for i in range(N - 1, -1, -1):
 		y = np.array(b[i + 1, :])
 		y = y[1 : M]
-		y[0] = y[0] - a[0] * K	# len(y) = M - 1
 
-		# x = np.linalg.solve(A, y)
-		x = tri(len(y), a, d, c, y)
+		y[0] = y[0] - a[1] * K	# len(y) = M - 1
+
+		x = np.linalg.solve(A, y)
+		# x = tri(len(y), a[1 : -1], d_, c[1: -1], y)
 
 		for j in range(1, M):
 			b[i][j] = x[j - 1]
@@ -50,8 +53,10 @@ def put_option(flag):	# TODO: parameterize variables
 			for j in range(M + 1):
 				b[i][j] = max(K - j * delta_s, b[i][j])
 
-	# print(b) #
+	# print(b)
+
+	return b[0][int(50/delta_s)]
 
 if __name__ == '__main__':
-    # put_option('american')
-    put_option('european')
+    print(put_option('american'))
+    # print(put_option('european'))
