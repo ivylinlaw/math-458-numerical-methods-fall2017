@@ -1,8 +1,7 @@
 import numpy as np
 from tri import tri
-# from scipy import interpolate
 
-def put_option(flag):	# TODO: parameterize variables
+def put_option(flag, t, S): # flag as 'american' or 'european' (default)
 	K = 50.0 	# strick price
 	r = 0.10 	# risk-free interest rate
 	sigma = 0.4 	# volatility
@@ -55,8 +54,8 @@ def put_option(flag):	# TODO: parameterize variables
 
 	# print(b)
 
-	return b[0][int(50/delta_s)]
+	return b[t][int(S/delta_s)] # return put price given t and S
 
 if __name__ == '__main__':
-    print(put_option('american'))
-    # print(put_option('european'))
+    print('American put option price when t = 0 and S = 50: $%s' % put_option('american', 0, 50))
+    print('European put option price when t = 0 and S = 50: $%s' % put_option('european', 0, 50))
