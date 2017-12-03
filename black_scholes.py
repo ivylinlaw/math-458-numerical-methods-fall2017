@@ -71,5 +71,5 @@ class BlackScholes:
 
 if __name__ == '__main__':
 	BS = BlackScholes(50.0, 0.10, 0.4, 5.0 / 12, 10, 100.0, 20)
-	print('American put option price when t = 0 and S = 50: $%s' % BS.put_option('american', 0, 50))
-	print('European put option price when t = 0 and S = 50: $%s' % BS.put_option('european', 0, 50))
+	print('American put option price when t = 0 and S = 50: $%s' % BS.put_option('put', 'american', 0, 50))
+	print('European put option price when t = 0 and S = 50: $%s' % BS.put_option('put', 'european', 0, 50))
