@@ -7,11 +7,10 @@ class Binomial:
 		self.sigma = sigma 	# volatility
 		self.T = totaltime 	# life of option (unit as year)
 		self.N = timeslice 	# number of time intervals
-		self.delta_t = self.T / self.N 	# length of each equally spaced time interval
-		self.u = 6.0/5 #np.exp(self.sigma * np.sqrt(self.delta_t))	# up factor
-		self.d = 4.0/5 #1 / self.u 	# down factor
+		self.delta_t = self.T / self.N if self.N != 0 else 0.0 	# length of each equally spaced time interval
+		self.u = np.exp(self.sigma * np.sqrt(self.delta_t))	# up factor
+		self.d = 1 / self.u 	# down factor
 		self.p = (np.exp(self.r * self.delta_t) - self.d) / (self.u - self.d)
-		print(self.p)
 
 	def get_price_tree(self, S):	# S as initial stock price
 		S_tree = np.full([self.N + 1, self.N + 1], 0.0)
@@ -48,13 +47,13 @@ class Binomial:
 		return C_tree
 
 if __name__ == '__main__':
-	# BT = Binomial(50.0, 0.10, 0.4, 5.0 / 12, 10)
-	BT = Binomial(12.0, 0.05, 0.4, 1.5, 3)
-	S_tree = BT.get_price_tree(10.0)
-	print('%s' % S_tree)
-	print('\n\n\n')
-	V_tree = BT.get_value_tree('put', 'european', S_tree)
-	print('%s' % V_tree)
-	print('\n\n\n')
+	BT = Binomial(50.0, 0.10, 0.4, 5.0 / 12, 10)
+	# BT = Binomial(12.0, 0.05, 0.4, 1.5, 3)
+	S_tree = BT.get_price_tree(50.0)
+	# print('%s' % S_tree)
+	# print('\n\n\n')
+	# V_tree = BT.get_value_tree('put', 'european', S_tree)
+	# print('%s' % V_tree)
+	# print('\n\n\n')
 	V_tree = BT.get_value_tree('put', 'american', S_tree)
-	print('%s' % V_tree)
+	print('%s' % V_tree[0,0])

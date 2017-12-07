@@ -13,8 +13,8 @@ def crank_nicolson(h, k, n, m):
 	for i in range(n - 1):
 		d[i] = r
 		c[i] = -1
-		u[i] = np.sin(np.pi * i * h)
-		
+		u[i] = np.sin(np.pi * (i + 1) * h)
+
 	print('u: %s' % u)
 
 	for j in range(m):
@@ -25,14 +25,15 @@ def crank_nicolson(h, k, n, m):
 
 		print('v: %s' % v) #
 
-		t = j * k
+		t = (j + 1) * k
 		for i in range(n - 1):
-			u[i] = np.exp(-np.power(np.pi, 2) * t) * np.sin(np.pi * i * h) - v[i]
+			u[i] = np.exp(-np.power(np.pi, 2) * t) * np.sin(np.pi * (i + 1) * h) 
+			u[i] -= v[i]
 
-		print('u: %s' % u)
+		print('diff: %s' % u)
 
 		for i in range(n - 1):
 			u[i] = v[i]
 
 if __name__ == '__main__':
-	crank_nicolson(0.1, 0.005, 10, 20)
+	crank_nicolson(np.power(2.0, -4), np.power(2.0, -10), 16, 13)
