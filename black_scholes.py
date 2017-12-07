@@ -68,7 +68,6 @@ class BlackScholes:
 			y[0] = y[0] - a[1] * self.K	# len(y) = M - 1
 
 			x = np.linalg.solve(A, y)
-			# x = tri(len(y), a[1 : -1], d_, c[1: -1], y)
 
 			for j in range(1, self.M):
 				self.prices[i][j] = x[j - 1]
@@ -80,9 +79,11 @@ class BlackScholes:
 					else:
 						self.prices[i][j] = max(self.K - j * delta_s, self.prices[i][j])
 
-		# print(self.prices)
-
 		return self.prices[t][int(S/delta_s)] # return put price given t and S
+
+	def get_parity(self, price, S):
+		p = price + self.K / np.power((1+self.r), self.T) - S
+		return p
 
 if __name__ == '__main__':
 	BS = BlackScholes(50.0, 0.10, 0.4, 5.0 / 12, 10, 100.0, 20)

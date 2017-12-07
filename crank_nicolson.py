@@ -1,8 +1,11 @@
 import numpy as np
 from scipy.integrate import quad
+from decimal import Decimal
 from tri import tri
 
 def crank_nicolson(h, k, n, m):
+	vec = []
+
 	s = np.power(h, 2) / k
 	r = 2 + s
 
@@ -16,7 +19,7 @@ def crank_nicolson(h, k, n, m):
 		c[i] = -1
 		u[i] = np.sin(np.pi * (i + 1) * h)
 
-	print('u: %s' % u)
+	vec.append(['u'] + map(Decimal, u))
 
 	for j in range(m):
 		for i in range(n - 1):
@@ -24,17 +27,22 @@ def crank_nicolson(h, k, n, m):
 			v[i] = s * u[i]
 		v = tri(n - 1, c, d, c, v)
 
-		print('v: %s' % v) #
+		vec.append(['v'] + map(Decimal, v))
 
 		t = (j + 1) * k
 		for i in range(n - 1):
 			u[i] = np.exp(-np.power(np.pi, 2) * t) * np.sin(np.pi * (i + 1) * h) 
 			u[i] -= v[i]
 
-		print('diff: %s' % u)
+		# print('diff: %s' % u)
+		vec.append(['diff'] + map(Decimal, u))
 
 		for i in range(n - 1):
 			u[i] = v[i]
+
+	vec_t = [['t']]
+	vec_t[0] += [i + 1 for i in range(len(vec[0]) - 1)]
+	return vec_t + vec
 
 def crank_nicolson_heat_eq(K, r, sigma, h, k, n, m):
 	alpha = (sigma * sigma - 2 * r) / (2 * sigma * sigma)
@@ -84,8 +92,5 @@ def crank_nicolson_heat_eq(K, r, sigma, h, k, n, m):
 			u[i] = v[i]
 
 if __name__ == '__main__':
-	# crank_nicolson(np.power(2.0, -4), np.power(2.0, -10), 16, 13)
-
-	# crank_nicolson_heat_eq(r, sigma, K, h, k, n, m)
 	crank_nicolson_heat_eq(50.0, 0.10, 0.4, np.power(2.0, -4), np.power(2.0, -10), 16, 13)
 

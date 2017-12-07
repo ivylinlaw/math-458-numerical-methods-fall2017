@@ -37,7 +37,6 @@ class Binomial:
 						C_tree[i , j] = max(self.K - S_tree[i , j], 0.0)
 				else:
 					C_tree[i , j] = np.exp(-self.r * self.delta_t) * (self.p * C_tree[i + 1, j] + ((1 - self.p) * C_tree[i + 1, j + 1]))
-					# C_tree[i , j] = (self.p * C_tree[i + 1, j] + ((1 - self.p) * C_tree[i + 1, j + 1])) / (1 + self.r)
 					if(flag is 'american'):
 						if(cpflag is 'call'):
 							C_tree[i, j] = max(C_tree[i, j], max(S_tree[i , j] - self.K, 0.0))
@@ -46,14 +45,13 @@ class Binomial:
 
 		return C_tree
 
+	def get_parity(self, C_tree, S):
+		c = C_tree[0,0]
+		p = c + self.K / np.power((1+self.r), self.T) - S
+		return p
+
 if __name__ == '__main__':
-	BT = Binomial(50.0, 0.10, 0.4, 5.0 / 12, 10)
-	# BT = Binomial(12.0, 0.05, 0.4, 1.5, 3)
-	S_tree = BT.get_price_tree(50.0)
-	# print('%s' % S_tree)
-	# print('\n\n\n')
-	# V_tree = BT.get_value_tree('put', 'european', S_tree)
-	# print('%s' % V_tree)
-	# print('\n\n\n')
-	V_tree = BT.get_value_tree('put', 'american', S_tree)
+	BT = Binomial(320.0, 0.02, 0.4, 1.0 / 12, 10)
+	S_tree = BT.get_price_tree(326.0)
+	V_tree = BT.get_value_tree('put', 'european', S_tree)
 	print('%s' % V_tree[0,0])
