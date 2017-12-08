@@ -1,5 +1,8 @@
 import numpy as np
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from scipy.stats import norm
+from texttable import Texttable
 from tri import tri
 
 class BlackScholes:
@@ -15,20 +18,56 @@ class BlackScholes:
 
 	# return list of time within totaltime divided by timeslice
 	def get_t_intervals(self):
-		return [i * self.T / self.N for i in range(self.N)]
+		return np.array([i * self.T / self.N for i in range(self.N + 1)])
+
+	def get_s_intervals(self):
+		return np.array([i * self.S_max / self.M for i in range(self.M + 1)])
 
 	def get_price_matrix(self):
 		return self.prices
 
+	def print_price_matrix(self):
+		p_vec = self.get_price_matrix() # t x s
+		s_vec = map(str, self.get_s_intervals())
+		p_vec = np.vstack([s_vec, p_vec])
+		t_vec = map(str, self.get_t_intervals())
+		t_vec = np.insert(t_vec, 0, 't\s')
+		p_vec = np.concatenate((t_vec[:, np.newaxis], p_vec), axis=1)
+
+		# print table
+		table = Texttable()
+		table.add_rows(p_vec)
+		table.set_cols_width([5 for i in range(len(p_vec[0]))])
+		print(table.draw())
+
+	def graph_price_matrix(self, title=''):
+		# plot graph
+		vec = []
+		t_vec = self.get_t_intervals()
+		s_vec = self.get_s_intervals()
+		p_vec = self.get_price_matrix()
+		for i in range(len(t_vec)):
+			for j in range(len(s_vec)):
+				vec.append([t_vec[i], s_vec[j], p_vec[i, j]])
+		vec = np.array(vec)
+		fig = plt.figure()
+		ax = fig.add_subplot(111, projection='3d')
+		ax.scatter(vec[:,0],vec[:,1],vec[:,2])
+		fig.suptitle(title)
+		ax.set_xlabel('time')
+		ax.set_ylabel('stock price')
+		ax.set_ylabel('option price($)')
+		plt.show()
+
 	# calculate option price by Black-Scholes model
 	def calculate_bs_model(self, cpfalg, S):	# cpfalg as 'call' or 'put'
-		d = 0 #???
+		d = 0
 		d1 = (np.log(float(S) / self.K) + ((self.r - d) + np.square(self.sigma) / 2.0) * self.T) / (self.sigma * np.sqrt(self.T))
 		d2 = d1 - self.sigma * np.sqrt(self.T)
 		if(cpfalg is 'call'):
-			return S * np.exp(-d * self.T) * norm.cdf(d1) - self.K * np.exp(-self.r * self.T) * norm.cdf(d2)
+			return S * norm.cdf(d1) - self.K * np.exp(-self.r * self.T) * norm.cdf(d2)
 		else: # cpfalg is 'put'
-			return self.K * np.exp(-self.r * self.T) * norm.cdf(-d2) - S * np.exp(-d * self.T) * norm.cdf(-d1)
+			return self.K * np.exp(-self.r * self.T) * norm.cdf(-d2) - S * norm.cdf(-d1)
 
 	# calculate option price using implicit finite differences method to solve the Black-Scholes PDE
 	def calculate_bs_implicit_fd(self, cpflag, flag, t, S): # flag as 'american' or 'european' (default)
